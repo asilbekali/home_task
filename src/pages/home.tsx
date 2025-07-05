@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import { Button, Card, Typography, Space, Image, Spin, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import Marquee from 'react-fast-marquee';
+
 import StackModal from '../components/StackModal';
 import {
+    useGetStacksQuery,
     useCreateStackMutation,
     useUpdateStackMutation,
     useDeleteStackMutation,
-    useGetStacksQuery,
     type Stack,
 } from '../features/STACKS/stackApi';
-import Marquee from 'react-fast-marquee';
 
 const HomePage: React.FC = () => {
-    const { data = [], isLoading } = useGetStacksQuery();
+    const { data = [], isLoading, isError } = useGetStacksQuery();
     const [createStack] = useCreateStackMutation();
     const [updateStack] = useUpdateStackMutation();
     const [deleteStack] = useDeleteStackMutation();
 
-    const [modalOpen, setModalOpen] = useState<boolean>(false);
+    const [modalOpen, setModalOpen] = useState(false);
     const [selectedStack, setSelectedStack] = useState<Stack | null>(null);
 
     const handleAddClick = () => {
@@ -33,9 +34,10 @@ const HomePage: React.FC = () => {
     const handleDelete = async (id: string) => {
         try {
             await deleteStack(id).unwrap();
-            message.success('Stack deleted successfully');
+            message.success('Deleted successfully');
         } catch (error) {
-            message.error('Failed to delete stack');
+            console.error(error);
+            message.error('Delete failed');
         }
     };
 
@@ -43,14 +45,19 @@ const HomePage: React.FC = () => {
         try {
             if (selectedStack) {
                 await updateStack({ id: selectedStack.id, ...values }).unwrap();
-                message.success('Stack updated successfully');
+                message.success('Updated successfully');
             } else {
                 await createStack(values).unwrap();
-                message.success('Stack created successfully');
+                message.success('Created successfully');
             }
             setModalOpen(false);
-        } catch (error) {
-            message.error('Operation failed');
+        } catch (error: any) {
+            console.error(error);
+            if (error?.data?.message?.[0]) {
+                message.error(error.data.message[0]);
+            } else {
+                message.error('Operation failed');
+            }
         }
     };
 
@@ -69,17 +76,19 @@ const HomePage: React.FC = () => {
 
             {isLoading ? (
                 <Spin />
+            ) : isError ? (
+                <Typography.Text type="danger">Failed to load stacks.</Typography.Text>
             ) : (
-                <Marquee gradient={false} speed={50} pauseOnHover>
+                <Marquee gradient={false} speed={40} pauseOnHover>
                     <Space>
-                        {data.map((stack: Stack) => (
+                        {data.map((stack) => (
                             <Card
                                 key={stack.id}
                                 hoverable
                                 style={{ width: 220, marginRight: 20 }}
                                 cover={
                                     <Image
-                                        src={stack.img}
+                                        src={stack.image}
                                         alt={stack.name}
                                         height={140}
                                         preview={false}

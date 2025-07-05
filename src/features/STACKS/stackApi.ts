@@ -1,31 +1,30 @@
+// src/features/STACKS/stackApi.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// Stack interface
 export interface Stack {
     id: string;
     name: string;
-    img: string;
+    image: string;
 }
 
 export const stackApi = createApi({
     reducerPath: "stackApi",
     baseQuery: fetchBaseQuery({
         baseUrl: "http://54.210.160.235/",
+        headers: {
+            "Content-Type": "application/json",
+        },
     }),
     tagTypes: ["Stack"],
     endpoints: (builder) => ({
         getStacks: builder.query<Stack[], void>({
-            query: () => ({
-                url: "stacks",
-                method: "GET",
-            }),
+            query: () => "stacks",
             transformResponse: (response: {
                 success: boolean;
                 data: Stack[];
             }) => response.data,
             providesTags: ["Stack"],
         }),
-
         createStack: builder.mutation<void, Omit<Stack, "id">>({
             query: (body) => ({
                 url: "stacks",
@@ -34,7 +33,6 @@ export const stackApi = createApi({
             }),
             invalidatesTags: ["Stack"],
         }),
-
         updateStack: builder.mutation<void, Stack>({
             query: ({ id, ...rest }) => ({
                 url: `stacks/${id}`,
@@ -43,7 +41,6 @@ export const stackApi = createApi({
             }),
             invalidatesTags: ["Stack"],
         }),
-
         deleteStack: builder.mutation<void, string>({
             query: (id) => ({
                 url: `stacks/${id}`,
