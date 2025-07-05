@@ -33,7 +33,6 @@ export const stackApi = createApi({
             }),
             invalidatesTags: ["Stack"],
         }),
-
         updateStack: builder.mutation<void, Stack>({
             query: ({ id, ...rest }) => ({
                 url: `stacks/${id}`,
