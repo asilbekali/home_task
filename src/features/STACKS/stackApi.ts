@@ -1,4 +1,3 @@
-// src/features/STACKS/stackApi.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface Stack {
@@ -25,6 +24,7 @@ export const stackApi = createApi({
             }) => response.data,
             providesTags: ["Stack"],
         }),
+
         createStack: builder.mutation<void, Omit<Stack, "id">>({
             query: (body) => ({
                 url: "stacks",
@@ -33,14 +33,16 @@ export const stackApi = createApi({
             }),
             invalidatesTags: ["Stack"],
         }),
+
         updateStack: builder.mutation<void, Stack>({
             query: ({ id, ...rest }) => ({
                 url: `stacks/${id}`,
-                method: "PUT",
+                method: "PATCH",
                 body: rest,
             }),
             invalidatesTags: ["Stack"],
         }),
+
         deleteStack: builder.mutation<void, string>({
             query: (id) => ({
                 url: `stacks/${id}`,
